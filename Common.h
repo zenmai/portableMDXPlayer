@@ -2,9 +2,9 @@
 #define YM_COMMON_H_INCLUDED
 #include	"arduino.h"
 #include	"YM2151.h"
-#include	"io.h"
+//#include	"io.h"
 
-#define		_DEBUG
+//#define		_DEBUG
 
 #ifdef	_DEBUG
 #define		ASSERT(msg)		io.Assert(msg)

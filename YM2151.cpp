@@ -39,13 +39,13 @@ void	YM2151_Class::begin()
 //
 #define		RD_HIGH		(PORTB = PORTB | 0x4)
 #define		RD_LOW		(PORTB = PORTB & ~0x4)
-#define		WR_HIGH		(PORTB = PORTB | 0x8)
-#define		WR_LOW		(PORTB = PORTB & ~0x8)
+#define		WR_HIGH		(PORTB = PORTB | 0xc0)
+#define		WR_LOW		(PORTB = PORTB & ~0xc0)
 #define		A0_HIGH		(PORTB = PORTB | 0x10)
 #define		A0_LOW		(PORTB = PORTB & ~0x10)
 
-#define		BUS_READ	DDRD=0x02;DDRB=0x3c;
-#define		BUS_WRITE	DDRD=0xfe;DDRB=0x3f;
+#define		BUS_READ	DDRD=0x02;DDRB=0xcc;
+#define		BUS_WRITE	DDRD=0xfe;DDRB=0xcf;
 
 #ifdef DIRECT_IO
 
@@ -321,7 +321,7 @@ void	YM2151_Class::noteOff(uint8_t ch)
 {
 		write(0x08,0x00 + ch);
 }
-
+/*
 PROGMEM prog_uchar KeyCodeTable[] = {
 	0x00,0x01,0x02,0x04,0x05,0x06,0x08,0x09,
 	0x0a,0x0c,0x0d,0x0e,0x10,0x11,0x12,0x14,
@@ -336,7 +336,7 @@ PROGMEM prog_uchar KeyCodeTable[] = {
 	0x6a,0x6c,0x6d,0x6e,0x70,0x71,0x72,0x74,
 	0x75,0x76,0x78,0x79,0x7a,0x7c,0x7d,0x7e,
 };
-
+*/
 /*! 音程を設定する
 	\param ch				設定するチャンネル
 	\param keycode			オクターブ0のD#を0とした音階、D# E F F# G G# A A# B (オクターブ1) C C# D....と並ぶ
@@ -349,7 +349,8 @@ void	YM2151_Class::setTone(uint8_t ch,uint8_t keycode,int16_t kf){
 	if(offset_note > 0xbf)offset_note=0xbf;
 	
 	write(0x30 + ch, offset_kf<<2);
-	write(0x28 + ch, pgm_read_byte_near(KeyCodeTable + offset_note));
+  write(0x28 + ch, (offset_note % 3) | ((offset_note / 3)<<2));
+	//write(0x28 + ch, pgm_read_byte_near(KeyCodeTable + offset_note));
 }
 /*! パンポットを設定する
 	\param ch				設定するチャンネル

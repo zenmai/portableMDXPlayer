@@ -87,91 +87,110 @@ void	MMLParser::Elapse(){
 }
 
 void	MMLParser::Calc(){
-	if(FunctionF & FLG_FOUT){
-	}
-	if(FunctionF & FLG_VLFO){
-		uint16_t	Delta;
-		switch(VLFO.Type){
-			case	0:	// non op
-				break;
-			case	1:	// L001120
-				VLFO.Offset += VLFO.Delta;
-				if(--VLFO.LengthCounter == 0){
-					VLFO.LengthCounter = VLFO.Length;
-					VLFO.Offset = VLFO.DeltaFixd;
-				}
-				break;
-			case	2:	// L001138
-				if(--VLFO.LengthCounter == 0){
-					VLFO.LengthCounter = VLFO.Length;
+	if(LFODelayClock != 0){
+		LFODelayCount();
+	} else {
+		if(FunctionF & FLG_FOUT){
+		}
+		if(FunctionF & FLG_VLFO){
+			uint16_t	Delta;
+			switch(VLFO.Type){
+				case	0:	// non op
+					break;
+				case	1:	// L001120
 					VLFO.Offset += VLFO.Delta;
-					VLFO.Delta = -VLFO.Delta;
-				}
-				break;
-			case	3:	// L00114e
-				VLFO.Offset += VLFO.Delta;
-				if(--VLFO.LengthCounter == 0){
-					VLFO.LengthCounter = VLFO.Length;
-					VLFO.Delta = -VLFO.Delta;
-				}
-				break;
-			case	4:	// L001164
-				if(--VLFO.LengthCounter == 0){
-					VLFO.LengthCounter = VLFO.Length;
-					VLFO.Offset = VLFO.Delta * random(255);
-				}
-				break;
-			default:
-				ASSERT("Unknown VLFO type!");
-				break;
+					if(--VLFO.LengthCounter == 0){
+						VLFO.LengthCounter = VLFO.Length;
+						VLFO.Offset = VLFO.DeltaFixd;
+					}
+					break;
+				case	2:	// L001138
+					if(--VLFO.LengthCounter == 0){
+						VLFO.LengthCounter = VLFO.Length;
+						VLFO.Offset += VLFO.Delta;
+						VLFO.Delta = -VLFO.Delta;
+					}
+					break;
+				case	3:	// L00114e
+					VLFO.Offset += VLFO.Delta;
+					if(--VLFO.LengthCounter == 0){
+						VLFO.LengthCounter = VLFO.Length;
+						VLFO.Delta = -VLFO.Delta;
+					}
+					break;
+				case	4:	// L001164
+					if(--VLFO.LengthCounter == 0){
+						VLFO.LengthCounter = VLFO.Length;
+						VLFO.Offset = VLFO.Delta * random(255);
+					}
+					break;
+				default:
+					ASSERT("Unknown VLFO type!");
+					break;
+			}
+			UpdateVolume();
 		}
-		UpdateVolume();
+		if(FunctionF & FLG_PLFO){
+			uint16_t	Delta;
+			switch(PLFO.Type){
+				case	0:	// non op
+					break;
+				case	1:	// L0010be
+					PLFO.Offset += PLFO.Delta;
+					if(--PLFO.LengthCounter == 0){
+						PLFO.LengthCounter = PLFO.Length;
+						PLFO.Offset = -PLFO.Offset;
+					}
+					break;
+				case	2:	// L0010d4
+					PLFO.Offset = PLFO.Delta;
+					if(--PLFO.LengthCounter == 0){
+						PLFO.LengthCounter = PLFO.Length;
+						PLFO.Delta = -PLFO.Delta;
+					}
+					break;
+				case	3:	// L0010ea
+					PLFO.Offset += PLFO.Delta;
+					if(--PLFO.LengthCounter == 0){
+						PLFO.LengthCounter = PLFO.Length;
+						PLFO.Delta = -PLFO.Delta;
+					}
+					break;
+				case	4:	// L001100
+					if(--PLFO.LengthCounter == 0){
+						PLFO.LengthCounter = PLFO.Length;
+						PLFO.Offset = PLFO.Delta * random(255);
+					}
+					break;
+				default:
+					ASSERT("Unknown PLFO type!");
+					break;
+				
+			}
+		}
 	}
-	if(FunctionF & FLG_PLFO){
-		uint16_t	Delta;
-		switch(PLFO.Type){
-			case	0:	// non op
-				break;
-			case	1:	// L0010be
-				PLFO.Offset += PLFO.Delta;
-				if(--PLFO.LengthCounter == 0){
-					PLFO.LengthCounter = PLFO.Length;
-					PLFO.Offset = -PLFO.Offset;
-				}
-				break;
-			case	2:	// L0010d4
-				PLFO.Offset = PLFO.Delta;
-				if(--PLFO.LengthCounter == 0){
-					PLFO.LengthCounter = PLFO.Length;
-					PLFO.Delta = -PLFO.Delta;
-				}
-				break;
-			case	3:	// L0010ea
-				PLFO.Offset += PLFO.Delta;
-				if(--PLFO.LengthCounter == 0){
-					PLFO.LengthCounter = PLFO.Length;
-					PLFO.Delta = -PLFO.Delta;
-				}
-				break;
-			case	4:	// L001100
-				if(--PLFO.LengthCounter == 0){
-					PLFO.LengthCounter = PLFO.Length;
-					PLFO.Offset = PLFO.Delta * random(255);
-				}
-				break;
-			default:
-				ASSERT("Unknown PLFO type!");
-				break;
-			
-		}
+	if(FunctionF & FLG_MPT){
+		Portamento += PortamentoDelta;
 	}
 	if((FunctionF & FLG_MPT) || (FunctionF & FLG_PLFO)){
-		if(FunctionF & FLG_MPT){
-			Portamento += PortamentoDelta;
-		}
 		SetTone();
 	}
+}
 
+void	MMLParser::LFODelayCount(){
+	
+	if(--LFODelayClock==0){
+		if(FunctionF & FLG_PLFO){
+			PLFO.LengthCounter = PLFO.LengthFixd;
+			PLFO.Delta = PLFO.DeltaStart;
+			PLFO.Offset = PLFO.OffsetStart;
+		}
+		if(FunctionF & FLG_VLFO){
+			VLFO.LengthCounter = VLFO.Length;
+			VLFO.Delta = VLFO.DeltaStart;
+			VLFO.Offset = VLFO.DeltaFixd;
+		}
+	}
 }
 
 void	MMLParser::KeyOn(){
@@ -179,6 +198,12 @@ void	MMLParser::KeyOn(){
 	SetTone();
 	YM2151.noteOn(Channel);
 	//YM2151.write(0x08,(RegSLOTMASK << 3)  + Channel);
+	LFODelayClock = LFODelay;
+	if(LFODelayClock != 0){
+		PLFO.Offset = 0;
+		VLFO.Offset = 0;
+		LFODelayCount();
+	}
 	FunctionF &= ~(FLG_MPT | FLG_FOUT);
 	if(FunctionF & FLG_NEXTMPT){
 		FunctionF |= FLG_MPT;
@@ -202,10 +227,10 @@ void	MMLParser::SetTone(){
 	int16_t	offset;
 	offset = Detune;
 	if(FunctionF & FLG_MPT){
-		offset += Portamento>>16;	// 右シフトは問題なし
+		offset += (int16_t)Portamento;//>>16;	// 右シフトは問題なし
 	}
 	if(FunctionF & FLG_PLFO){
-		offset += PLFO.Offset>>16;
+		offset += (int16_t)PLFO.Offset;//>>16;
 	}
 	YM2151.setTone(Channel,Note,offset);
 	return;
@@ -233,7 +258,7 @@ void	MMLParser::C_e8_PCM8Ext(){
 //・LFOディレイ設定
 //    [$E9] + [???]                 MDコマンド対応
 void	MMLParser::C_e9_LFODelay(){
-	mdx.ReadData8(CurrentAddr++);
+	LFODelay = mdx.ReadData8(CurrentAddr++);
 }
 //・OPMLFO制御
 //    [$EA] + [$80]                 MHOF
@@ -320,9 +345,11 @@ void	MMLParser::C_ec_LFOPitchCtrl(){
 	}
 	PLFO.LengthFixd = length;
 	int16_t	delta = mdx.ReadData16(CurrentAddr);CurrentAddr+=2;
-	int16_t	delta_l = delta;
+//  int32_t delta_l = (int32_t)delta << 8;
+  int16_t delta_l = delta;
 	if(lfocom_f >= 0x4){
 		lfocom_f &= 0x3;
+    //delta_l <<= 8;
 	} else {
 		delta_l >>= 8;
 	}
@@ -386,10 +413,12 @@ void	MMLParser::C_f1_EndOfData(){
 void	MMLParser::C_f2_Portamento(){
 	int16_t	port = mdx.ReadData16(CurrentAddr);
 	CurrentAddr+=2;
-	PortamentoDelta = port;
-	for(int i=0;i<8;i++){	// =<< 8 だけどArduinoの32bit演算libで挙動不審
-		PortamentoDelta += PortamentoDelta;
-	}
+//  PortamentoDelta = (uint32_t)port << 8;
+  PortamentoDelta = (int16_t)port >> 8;
+  //PortamentoDelta <<= 8;
+//	for(int i=0;i<8;i++){	// =<< 8 だけどArduinoの32bit演算libで挙動不審
+//		PortamentoDelta += PortamentoDelta;
+//	}
 	Portamento = 0;
 	FunctionF |= FLG_NEXTMPT;
 }

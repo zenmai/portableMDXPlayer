@@ -30,7 +30,7 @@ class	YM2151_Class{
 		static	const	uint8_t		PIN_D7=9;
 		
 		static	const	uint8_t		PIN_RD=10;
-		static	const	uint8_t		PIN_WR=11;
+		static	const	uint8_t		PIN_WR=20;
 		static	const	uint8_t		PIN_A0=12;
 		static	const	uint8_t		PIN_IC=13;
 		
@@ -42,4 +42,5 @@ class	YM2151_Class{
 		void	wait(uint8_t loop);
 };
 extern YM2151_Class YM2151;
+typedef const unsigned char prog_uchar;
 #endif  //YM2151H_INCLUDED

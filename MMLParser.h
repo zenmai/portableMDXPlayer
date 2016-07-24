@@ -33,22 +33,24 @@ class	MMLParser{
 		RepeatFrame	RepeatList[4];
 		int8_t		KeyLength;
 		
-		uint32_t	Portamento;
-		uint32_t	PortamentoDelta;
+		uint16_t	Portamento;
+		uint16_t	PortamentoDelta;
 		uint16_t	Detune;
 		uint8_t		Note;
 		uint8_t		Volume;
-		uint8_t		KeyOnDelay;
-		uint8_t		KeyOnDelayClock;
+    uint8_t   KeyOnDelay;
+    uint8_t   KeyOnDelayClock;
+    uint8_t   LFODelay;
+    uint8_t   LFODelayClock;
 		
 		uint8_t		RegPAN;
 		uint8_t		RegPMSAMS;
 
 		typedef		struct	{
-			uint32_t	OffsetStart;		//32->16
-			uint32_t	DeltaStart;			//32->16
-			uint32_t	Offset;				//32->16
-			uint32_t	Delta;				//32->16
+			uint16_t	OffsetStart;		//32->16
+			uint16_t	DeltaStart;			//32->16
+			uint16_t	Offset;				//32->16
+			uint16_t	Delta;				//32->16
 			uint16_t	LengthFixd;
 			uint16_t	Length;
 			uint16_t	LengthCounter;
@@ -71,6 +73,7 @@ class	MMLParser{
 		void		Elapse();
 		void		Calc();
 		void		SetTone();
+		void		LFODelayCount();
 		void		KeyOn();
 		void		KeyOff();
 		void		UpdateVolume();

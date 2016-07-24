@@ -5,14 +5,18 @@ void		MDXParser::Setup(uint16_t bp)
 {
 	uint16_t	tableaddr=0;
 	DataBP = bp;
-	SetTempo(100);
+	//SetTempo(100);
+
 	while(ReadData8(tableaddr++)!=0);
 	BaseOffset = tableaddr;
 	TimbreOffset = ReadData16(tableaddr);
 	tableaddr+=2;
 	for(int i=0;i<ChNum;i++){
 		OPMChannel[i].Init(i,BaseOffset,ReadData16(tableaddr));
-		tableaddr+=2;
+    //if(i==0)
+    //tableaddr+=10;
+    //else
+    tableaddr+=2;
 	}
 	YM2151.write(0x0f,0);
 
@@ -53,10 +57,12 @@ uint16_t	MDXParser::Elapse(uint16_t c){
 	}
 	return minclock;
 }
+
 void		MDXParser::SetTempo(uint8_t tempo){
 	Tempo = tempo;
 	ClockMicro = (1024*(256-Tempo))/4;
 }
+
 void		MDXParser::SendSyncRelease(uint8_t ch){
 	if(ch < ChNum){
 		OPMChannel[ch].StatusF &= ~FLG_SYNCWAIT;
@@ -76,9 +82,11 @@ uint16_t	MDXParser::GetTimbreAddr(uint8_t timbleno){
 	ASSERT("can not find timbre");
 	return 0;
 }
+/*
 uint32_t	MDXParser::ClockToMilliSec(uint8_t clock){
 	return ((uint32_t)clock * ClockMicro)/(uint32_t)1000;
 }
+*/
 uint32_t	MDXParser::ClockToMicroSec(uint8_t clock){
 	return ((uint32_t)clock * ClockMicro);
 }
