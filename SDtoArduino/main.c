@@ -151,7 +151,9 @@ void sdInit(void)
 	//arg.bytes[2] = 0x00;
 	for(c=0;c<250;c++)
 	{
+		arg.bytes[3] = 0;
 		sdCmdSend(55);
+		_delay_ms(1);
 		arg.bytes[3] = 0x40;
 		if(sdCmdSend(41)==0)break;
 	}
